@@ -66,3 +66,44 @@ def test_snake_collision_with_wall():
     game.direction = pygame.K_LEFT
     game.update()
     assert not game.running
+
+
+def test_game_score():
+    game = Game()
+    game.snake = [(400, 300)]
+    game.food = (410, 300)
+    game.update()
+    assert game.score == 1
+
+
+def test_game_over():
+    game = Game()
+    game.snake = [(400, 300)]
+    game.food = (410, 300)
+    game.update()
+    game.snake = [(410, 300)]
+    game.update()
+    assert not game.running
+
+
+def test_game_over_screen():
+    game = Game()
+    game.snake = [(0, 10)]
+    game.direction = pygame.K_LEFT
+    game.update()  # This should trigger game over
+    assert game.game_over is True
+    game.render()
+    game_over_text = game.font.render('Game Over! Press R to Restart', True, (255, 255, 255))
+    assert game_over_text is not None
+
+
+def test_restart_game():
+    game = Game()
+    game.snake = [(0, 10)]
+    game.direction = pygame.K_LEFT
+    game.update()  # This should trigger game over
+    assert game.game_over is True
+    game.reset_game()
+    assert game.game_over is False
+    assert game.snake == [(400, 300)]
+    assert game.score == 0
