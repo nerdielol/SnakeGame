@@ -45,3 +45,16 @@ def test_snake_direction_change():
     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT))
     game.handle_input()
     assert game.direction == pygame.K_LEFT
+
+
+def test_food_spawn():
+    game = Game()
+    assert game.food is not None
+
+
+def test_snake_eat_food():
+    game = Game()
+    game.snake = [(400, 300)]
+    game.food = (410, 300)
+    game.update()
+    assert len(game.snake) == 2
