@@ -43,9 +43,8 @@ class Game():
         while self.running:
             self.handle_input()
             self.update()
+            self.render()
             self.clock.tick(15)
-            pygame.display.flip()
-        pygame.quit()
 
     def handle_input(self):
         for event in pygame.event.get():
@@ -53,3 +52,10 @@ class Game():
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 self.direction = event.key
+
+    def render(self):
+        self.screen.fill((0, 0, 0))
+        for segment in self.snake:
+            pygame.draw.rect(self.screen, (0, 255, 0), (*segment, 10, 10))
+        pygame.draw.rect(self.screen, (255, 0, 0), (*self.food, 10, 10))
+        pygame.display.flip()
