@@ -29,3 +29,12 @@ def test_snake_move():
     game.update()
 
     assert game.snake[0] == (400, 290)
+
+
+def test_game_loop_quit():
+    game = Game()
+    game.running = True
+    pygame.event.post(pygame.event.Event(pygame.QUIT))
+    game.run()
+
+    assert not game.running
