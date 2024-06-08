@@ -12,3 +12,10 @@ def test_initialize_clock():
     game = Game()
 
     assert game.clock is not None
+
+
+def test_initial_snake_position():
+    game = Game()
+    snake = game.snake
+
+    assert snake == [(400, 300)]
