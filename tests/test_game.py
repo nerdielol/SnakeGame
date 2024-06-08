@@ -1,3 +1,4 @@
+import pygame
 from snake_game import Game
 
 
@@ -19,3 +20,12 @@ def test_initial_snake_position():
     snake = game.snake
 
     assert snake == [(400, 300)]
+
+
+def test_snake_move():
+    game = Game()
+    game.snake = [(400, 300)]
+    game.direction = pygame.K_UP
+    game.update()
+
+    assert game.snake[0] == (400, 290)
