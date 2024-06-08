@@ -9,12 +9,12 @@ class Game():
         pygame.display.set_caption('Snake Game')
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 35)
+        self.running = False
         self.reset_game()
 
     def reset_game(self):
         self.snake = [(400, 300)]
         self.direction = pygame.K_RIGHT
-        self.running = False
         self.food = self.spawn_food()
         self.score = 0
         self.game_over = False
