@@ -58,3 +58,11 @@ def test_snake_eat_food():
     game.food = (410, 300)
     game.update()
     assert len(game.snake) == 2
+
+
+def test_snake_collision_with_wall():
+    game = Game()
+    game.snake = [(10, 10)]
+    game.direction = pygame.K_LEFT
+    game.update()
+    assert not game.running
