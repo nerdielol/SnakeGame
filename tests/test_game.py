@@ -38,3 +38,10 @@ def test_game_loop_quit():
     game.run()
 
     assert not game.running
+
+
+def test_snake_direction_change():
+    game = Game()
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT))
+    game.handle_input()
+    assert game.direction == pygame.K_LEFT
