@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building2...'
+                echo 'Building...'
                 sh 'pip install -r requirements.txt'
                 sh 'python -m build'
                 sh 'pip install dist/snake*.whl'
@@ -11,13 +11,13 @@ pipeline {
         }
         stage('Test') {
             steps {
-                echo 'Testing2...'
+                echo 'Testing...'
                 sh 'python -m pytest tests/'
             }
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying2...'
+                echo 'Deploying...'
                 // Add deployment steps here
             }
         }
