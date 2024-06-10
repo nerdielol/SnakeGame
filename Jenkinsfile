@@ -17,17 +17,17 @@ pipeline {
                 '''
             }
         }
-        // stage('Test') {
-        //     steps {
-        //         echo 'Testing...'
-        //         sh 'python -m pytest tests/'
-        //     }
-        // }
-        // stage('Deploy') {
-        //     steps {
-        //         echo 'Deploying...'
-        //         // Add deployment steps here
-        //     }
-        // }
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+                sh 'python -m pytest tests/'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
+                // Add deployment steps here
+            }
+        }
     }
 }
