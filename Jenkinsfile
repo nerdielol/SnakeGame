@@ -4,14 +4,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-                // Create a virtual environment
-                sh 'python3 -m venv venv'
+                // Install pipx if not already installed
+                sh 'apt-get install -y pipx'
                 
-                // Activate the virtual environment and install dependencies
+                // Create a virtual environment and install dependencies using pipx
                 sh '''
                 #!/bin/bash
+                python3 -m venv venv
                 source venv/bin/activate
-                pip install -r requirements.txt
+                pipx install -r requirements.txt
                 '''
                 sh 'python -m build'
                 sh 'pip install dist/snake*.whl'
