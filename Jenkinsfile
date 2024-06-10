@@ -6,6 +6,7 @@ pipeline {
                 echo 'Building...'
                 sh 'python3 -m venv venv'
                 sh '#!/bin/bash'
+                sh 'set -eux'
                 sh '. venv/bin/activate && echo "Virtual environment activated"'
                 sh 'which python'
                 sh 'which pip'
