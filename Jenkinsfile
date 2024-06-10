@@ -5,10 +5,11 @@ pipeline {
             steps {
                 echo 'Building...'
                 sh 'python3 -m venv venv'
-                sh '#!/bin/bash'
-                sh 'set -eux'
-                sh '. venv/bin/activate && echo "Virtual environment activated"'
-                // sh 'which python'
+                sh '''
+                #!/bin/bash
+                set -eux
+                . venv/bin/activate && echo "Virtual environment activated"
+                which python'''
                 // sh 'which pip'
                 // sh 'pip install -r requirements.txt'
                 // sh 'python -m build'
