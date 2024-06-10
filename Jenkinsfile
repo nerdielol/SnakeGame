@@ -8,7 +8,7 @@ pipeline {
                 sh '''
                 #!/bin/bash
                 set -eux
-                source venv/bin/activate && echo "Virtual environment activated"
+                . venv/bin/activate && echo "Virtual environment activated"
                 which python
                 which pip 
                 pip install -r requirements.txt
