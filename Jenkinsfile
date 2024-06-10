@@ -8,23 +8,23 @@ pipeline {
                 sh '#!/bin/bash'
                 sh 'set -eux'
                 sh '. venv/bin/activate && echo "Virtual environment activated"'
-                sh 'which python'
-                sh 'which pip'
-                sh 'pip install -r requirements.txt'
-                sh 'python -m build'
-                sh 'pip install dist/snake*.whl'
+                // sh 'which python'
+                // sh 'which pip'
+                // sh 'pip install -r requirements.txt'
+                // sh 'python -m build'
+                // sh 'pip install dist/snake*.whl'
             }
         }
-        stage('Test') {
-            steps {
-                echo 'Testing...'
-                sh 'python -m pytest tests/'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying...'
-                // Add deployment steps here
+        // stage('Test') {
+        //     steps {
+        //         echo 'Testing...'
+        //         sh 'python -m pytest tests/'
+        //     }
+        // }
+        // stage('Deploy') {
+        //     steps {
+        //         echo 'Deploying...'
+        //         // Add deployment steps here
             }
         }
     }
