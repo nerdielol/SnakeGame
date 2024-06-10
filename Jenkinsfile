@@ -9,8 +9,6 @@ pipeline {
                 #!/bin/bash
                 set -eux
                 . venv/bin/activate && echo "Virtual environment activated"
-                which python
-                which pip 
                 pip install -r requirements.txt
                 python -m build
                 pip install dist/snake*.whl
