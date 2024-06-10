@@ -10,8 +10,8 @@ pipeline {
                 set -eux
                 . venv/bin/activate && echo "Virtual environment activated"
                 which python
-                which pip '''
-                // sh 'pip install -r requirements.txt'
+                which pip 
+                pip install -r requirements.txt'''
                 // sh 'python -m build'
                 // sh 'pip install dist/snake*.whl'
             }
