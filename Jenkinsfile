@@ -4,9 +4,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
+                // Create a virtual environment
                 sh 'python3 -m venv venv'
-                sh '. venv/bin/activate'
-                sh 'pip install -r requirements.txt'
+                
+                // Activate the virtual environment and install dependencies
+                sh '''
+                #!/bin/bash
+                source venv/bin/activate
+                pip install -r requirements.txt
+                '''
                 sh 'python -m build'
                 sh 'pip install dist/snake*.whl'
             }
