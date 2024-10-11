@@ -1,86 +1,97 @@
-import random
 import pygame
+import random
 
+# Initialize Pygame
+pygame.init()
 
-class Game():
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode((800, 600))
-        pygame.display.set_caption('Snake Game')
-        self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 35)
-        self.running = False
-        self.reset_game()
+# Screen dimensions
+WIDTH, HEIGHT = 800, 600
+CELL_SIZE = 20
 
-    def reset_game(self):
-        self.snake = [(400, 300)]
-        self.direction = pygame.K_RIGHT
-        self.food = self.spawn_food()
-        self.score = 0
-        self.game_over = False
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
-    def spawn_food(self):
-        return (random.randint(0, 79) * 10, random.randint(0, 59) * 10)
+# Directions
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
 
-    def update(self):
-        head_x, head_y = self.snake[0]
-        if self.direction == pygame.K_UP:
-            head_y -= 10
-        elif self.direction == pygame.K_DOWN:
-            head_y += 10
-        elif self.direction == pygame.K_LEFT:
-            head_x -= 10
-        elif self.direction == pygame.K_RIGHT:
-            head_x += 10
+class Player:
+    def __init__(self, color, start_pos):
+        self.color = color
+        self.positions = [start_pos]
+        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        self.grow = False
 
-        new_head = (head_x, head_y)
-        if new_head == self.food:
-            self.food = self.spawn_food()
-            self.score += 1
+    def move(self):
+        head_x, head_y = self.positions[0]
+        dir_x, dir_y = self.direction
+        new_head = (head_x + dir_x * CELL_SIZE, head_y + dir_y * CELL_SIZE)
+        
+        if self.grow:
+            self.positions.insert(0, new_head)
+            self.grow = False
         else:
-            self.snake.pop()
+            self.positions = [new_head] + self.positions[:-1]
 
-        self.snake = [new_head] + self.snake
+    def change_direction(self, new_direction):
+        if (new_direction[0] * -1, new_direction[1] * -1) != self.direction:
+            self.direction = new_direction
 
-        if head_x < 0 or head_x >= 800 or head_y < 0 or head_y >= 600 \
-           or new_head in self.snake[1:]:
-            self.game_over = True
+    def draw(self, screen):
+        for pos in self.positions:
+            pygame.draw.rect(screen, self.color, (*pos, CELL_SIZE, CELL_SIZE))
 
-    def run(self):
-        self.running = True
-        while self.running:
-            self.handle_input()
-            if not self.game_over:
-                self.update()
-            self.render()
-            self.clock.tick(15)
+    def check_collision(self, other):
+        return self.positions[0] in other.positions
 
-    def handle_input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            elif event.type == pygame.KEYDOWN:
-                if not self.game_over:
-                    self.direction = event.key
-                elif event.key == pygame.K_r:   # Restart game
-                    self.reset_game()
+# Initialize players
+players = [
+    Player(RED, (100, 100)),
+    Player(BLUE, (200, 200))
+]
 
-    def render(self):
-        self.screen.fill((0, 0, 0))
-        for segment in self.snake:
-            pygame.draw.rect(self.screen, (0, 255, 0), (*segment, 10, 10))
-        pygame.draw.rect(self.screen, (255, 0, 0), (*self.food, 10, 10))
-        self.display_score()
-        if self.game_over:
-            self.display_game_over()
-        pygame.display.flip()
+# Game loop
+running = True
+clock = pygame.time.Clock()
 
-    def display_score(self):
-        text = self.font.render(f'Score: {self.score}', True, (255, 255, 255))
-        self.screen.blit(text, (10, 10))
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_w:
+                players[0].change_direction(UP)
+            elif event.key == pygame.K_s:
+                players[0].change_direction(DOWN)
+            elif event.key == pygame.K_a:
+                players[0].change_direction(LEFT)
+            elif event.key == pygame.K_d:
+                players[0].change_direction(RIGHT)
+            elif event.key == pygame.K_UP:
+                players[1].change_direction(UP)
+            elif event.key == pygame.K_DOWN:
+                players[1].change_direction(DOWN)
+            elif event.key == pygame.K_LEFT:
+                players[1].change_direction(LEFT)
+            elif event.key == pygame.K_RIGHT:
+                players[1].change_direction(RIGHT)
 
-    def display_game_over(self):
-        game_over_text = self.font.render('Game Over! Press R to Restart', True, (255, 255, 255))
-        score_text = self.font.render(f'Score: {self.score}', True, (255, 255, 255))
-        self.screen.blit(game_over_text, [(self.screen.get_width() - game_over_text.get_width()) // 2, self.screen.get_height() // 2 - 30])
-        self.screen.blit(score_text, [(self.screen.get_width() - score_text.get_width()) // 2, self.screen.get_height() // 2 + 10])
+    for player in players:
+        player.move()
+
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen.fill(BLACK)
+
+    for player in players:
+        player.draw(screen)
+
+    pygame.display.flip()
+    clock.tick(10)
+
+pygame.quit()

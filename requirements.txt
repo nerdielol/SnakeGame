@@ -1,8 +1,9 @@
-build==1.2.1
-iniconfig==2.0.0
-packaging==24.0
-pluggy==1.5.0
-pygame==2.5.2
-pyproject_hooks==1.1.0
-pytest==8.2.2
+iniconfig
+packaging
+pluggy
+pygame
+pyproject_hooks
+pytest
+pytest-cov
 -e git+https://github.com/nerdielol/SnakeGame.git@0f5cc3aa8a09d907d675d604ad8759d00e7c6558#egg=snake_game
+random
