@@ -1,86 +1,229 @@
-import random
 import pygame
+import random
 
+# Initialize Pygame
+pygame.init()
 
-class Game():
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode((800, 600))
-        pygame.display.set_caption('Snake Game')
-        self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 35)
-        self.running = False
-        self.reset_game()
+# Screen dimensions
+WIDTH, HEIGHT = 800, 600
+CELL_SIZE = 20
 
-    def reset_game(self):
-        self.snake = [(400, 300)]
-        self.direction = pygame.K_RIGHT
-        self.food = self.spawn_food()
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+
+# Directions
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+
+class Player:
+    def __init__(self, texture_path, start_pos):
+        self.texture = pygame.image.load(texture_path)
+        self.texture = pygame.transform.scale(self.texture, (CELL_SIZE, CELL_SIZE))
+        self.start_pos = start_pos
+        self.positions = [start_pos]
+        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        self.grow = False
         self.score = 0
-        self.game_over = False
+        self.speed_boost = False
+        self.speed_boost_counter = 0
 
-    def spawn_food(self):
-        return (random.randint(0, 79) * 10, random.randint(0, 59) * 10)
+    def move(self):
+        head_x, head_y = self.positions[0]
+        dir_x, dir_y = self.direction
+        new_head = (head_x + dir_x * CELL_SIZE, head_y + dir_y * CELL_SIZE)
 
-    def update(self):
-        head_x, head_y = self.snake[0]
-        if self.direction == pygame.K_UP:
-            head_y -= 10
-        elif self.direction == pygame.K_DOWN:
-            head_y += 10
-        elif self.direction == pygame.K_LEFT:
-            head_x -= 10
-        elif self.direction == pygame.K_RIGHT:
-            head_x += 10
-
-        new_head = (head_x, head_y)
-        if new_head == self.food:
-            self.food = self.spawn_food()
-            self.score += 1
+        # Wrap around screen boundaries
+        new_head = (new_head[0] % WIDTH, new_head[1] % HEIGHT)
+        
+        if self.grow:
+            self.positions.insert(0, new_head)
+            self.grow = False
         else:
-            self.snake.pop()
+            self.positions = [new_head] + self.positions[:-1]
 
-        self.snake = [new_head] + self.snake
+        # Handle speed boost duration
+        if self.speed_boost:
+            self.speed_boost_counter -= 1
+            if self.speed_boost_counter <= 0:
+                self.speed_boost = False
 
-        if head_x < 0 or head_x >= 800 or head_y < 0 or head_y >= 600 \
-           or new_head in self.snake[1:]:
-            self.game_over = True
+    def change_direction(self, new_direction):
+        if (new_direction[0] * -1, new_direction[1] * -1) != self.direction:
+            self.direction = new_direction
 
-    def run(self):
-        self.running = True
-        while self.running:
-            self.handle_input()
-            if not self.game_over:
-                self.update()
-            self.render()
-            self.clock.tick(15)
+    def draw(self, screen):
+        for pos in self.positions:
+            screen.blit(self.texture, pos)
 
-    def handle_input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            elif event.type == pygame.KEYDOWN:
-                if not self.game_over:
-                    self.direction = event.key
-                elif event.key == pygame.K_r:   # Restart game
-                    self.reset_game()
+    def check_collision(self, other):
+        return self.positions[0] in other.positions
 
-    def render(self):
-        self.screen.fill((0, 0, 0))
-        for segment in self.snake:
-            pygame.draw.rect(self.screen, (0, 255, 0), (*segment, 10, 10))
-        pygame.draw.rect(self.screen, (255, 0, 0), (*self.food, 10, 10))
-        self.display_score()
-        if self.game_over:
-            self.display_game_over()
+    def grow_snake(self):
+        self.grow = True
+        self.score += 1
+
+    def reset(self):
+        self.positions = [self.start_pos]
+        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        self.grow = False
+        self.score = 0
+        self.speed_boost = False
+        self.speed_boost_counter = 0
+
+    def activate_speed_boost(self):
+        self.speed_boost = True
+        self.speed_boost_counter = 50  # Speed boost lasts for 50 frames
+
+class Item:
+    def __init__(self):
+        self.position = (random.randint(0, (WIDTH - CELL_SIZE) // CELL_SIZE) * CELL_SIZE,
+                         random.randint(0, (HEIGHT - CELL_SIZE) // CELL_SIZE) * CELL_SIZE)
+        self.color = GREEN
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, (*self.position, CELL_SIZE, CELL_SIZE))
+
+class AdvantageItem:
+    def __init__(self):
+        self.position = (random.randint(0, (WIDTH - CELL_SIZE) // CELL_SIZE) * CELL_SIZE,
+                         random.randint(0, (HEIGHT - CELL_SIZE) // CELL_SIZE) * CELL_SIZE)
+        self.color = YELLOW
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, (*self.position, CELL_SIZE, CELL_SIZE))
+
+# Game loop
+running = True
+clock = pygame.time.Clock()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+mode_selected = False
+single_player = False
+
+while running:
+    if not mode_selected:
+        screen.fill(BLACK)
+        font = pygame.font.Font(None, 36)
+        text = font.render("Press 1 for Single Player or 2 for Two Players", True, WHITE)
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
         pygame.display.flip()
 
-    def display_score(self):
-        text = self.font.render(f'Score: {self.score}', True, (255, 255, 255))
-        self.screen.blit(text, (10, 10))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    single_player = True
+                    mode_selected = True
+                elif event.key == pygame.K_2:
+                    single_player = False
+                    mode_selected = True
+    else:
+        # Initialize players and items based on selected mode
+        if single_player:
+            players = [Player('red_texture.png', (100, 100)), Player('blue_texture.png', (200, 200))]  # Add bot player
+        else:
+            players = [
+                Player('red_texture.png', (100, 100)),
+                Player('blue_texture.png', (200, 200))
+            ]
+        items = [Item()]
+        advantage_items = [AdvantageItem()]
 
-    def display_game_over(self):
-        game_over_text = self.font.render('Game Over! Press R to Restart', True, (255, 255, 255))
-        score_text = self.font.render(f'Score: {self.score}', True, (255, 255, 255))
-        self.screen.blit(game_over_text, [(self.screen.get_width() - game_over_text.get_width()) // 2, self.screen.get_height() // 2 - 30])
-        self.screen.blit(score_text, [(self.screen.get_width() - score_text.get_width()) // 2, self.screen.get_height() // 2 + 10])
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_w:
+                        players[0].change_direction(UP)
+                    elif event.key == pygame.K_s:
+                        players[0].change_direction(DOWN)
+                    elif event.key == pygame.K_a:
+                        players[0].change_direction(LEFT)
+                    elif event.key == pygame.K_d:
+                        players[0].change_direction(RIGHT)
+                    if not single_player:
+                        if event.key == pygame.K_UP:
+                            players[1].change_direction(UP)
+                        elif event.key == pygame.K_DOWN:
+                            players[1].change_direction(DOWN)
+                        elif event.key == pygame.K_LEFT:
+                            players[1].change_direction(LEFT)
+                        elif event.key == pygame.K_RIGHT:
+                            players[1].change_direction(RIGHT)
+
+            for player in players:
+                player.move()
+
+                # Check for collisions with items
+                for item in items:
+                    if player.positions[0] == item.position:
+                        player.grow_snake()
+                        items.remove(item)
+                        items.append(Item())
+
+                # Check for collisions with advantage items
+                for advantage_item in advantage_items:
+                    if player.positions[0] == advantage_item.position:
+                        player.activate_speed_boost()
+                        advantage_items.remove(advantage_item)
+                        advantage_items.append(AdvantageItem())
+                        break  # Ensure only the player who collides gets the boost
+
+            # Check for collisions between players
+            if players[0].check_collision(players[1]):
+                players[1].reset()
+            elif players[1].check_collision(players[0]):
+                players[0].reset()
+
+            # Bot player logic (if single player, the second player is a bot)
+            if single_player:
+                bot = players[1]
+                bot_head_x, bot_head_y = bot.positions[0]
+                item_x, item_y = items[0].position
+                
+                # Simple logic for bot to move towards the item
+                if bot_head_x < item_x:
+                    bot.change_direction(RIGHT)
+                elif bot_head_x > item_x:
+                    bot.change_direction(LEFT)
+                elif bot_head_y < item_y:
+                    bot.change_direction(DOWN)
+                elif bot_head_y > item_y:
+                    bot.change_direction(UP)
+
+            screen.fill(BLACK)
+
+            # Draw players, items, and scores
+            for player in players:
+                player.draw(screen)
+
+            for item in items:
+                item.draw(screen)
+
+            for advantage_item in advantage_items:
+                advantage_item.draw(screen)
+
+            # Display scores and speeds
+            font = pygame.font.Font(None, 36)
+            for i, player in enumerate(players):
+                score_text = font.render(f"Player {i + 1} Score: {player.score}", True, WHITE)
+                speed_text = font.render(f"Player {i + 1} Speed: {'Fast' if player.speed_boost else 'Normal'}", True, WHITE)
+                screen.blit(score_text, (10, 10 + i * 60))
+                screen.blit(speed_text, (10, 40 + i * 60))
+
+            pygame.display.flip()
+            for player in players:
+                if player.speed_boost:
+                    clock.tick(40)
+                else:
+                    clock.tick(20)
+
+pygame.quit()
