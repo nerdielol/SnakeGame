@@ -23,8 +23,9 @@ LEFT = (-1, 0)
 RIGHT = (1, 0)
 
 class Player:
-    def __init__(self, color, start_pos):
-        self.color = color
+    def __init__(self, texture_path, start_pos):
+        self.texture = pygame.image.load(texture_path)
+        self.texture = pygame.transform.scale(self.texture, (CELL_SIZE, CELL_SIZE))
         self.start_pos = start_pos
         self.positions = [start_pos]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
@@ -59,7 +60,7 @@ class Player:
 
     def draw(self, screen):
         for pos in self.positions:
-            pygame.draw.rect(screen, self.color, (*pos, CELL_SIZE, CELL_SIZE))
+            screen.blit(self.texture, pos)
 
     def check_collision(self, other):
         return self.positions[0] in other.positions
@@ -126,11 +127,11 @@ while running:
     else:
         # Initialize players and items based on selected mode
         if single_player:
-            players = [Player(RED, (100, 100)), Player(BLUE, (200, 200))]  # Add bot player
+            players = [Player('red_texture.png', (100, 100)), Player('blue_texture.png', (200, 200))]  # Add bot player
         else:
             players = [
-                Player(RED, (100, 100)),
-                Player(BLUE, (200, 200))
+                Player('red_texture.png', (100, 100)),
+                Player('blue_texture.png', (200, 200))
             ]
         items = [Item()]
         advantage_items = [AdvantageItem()]
@@ -174,6 +175,7 @@ while running:
                         player.activate_speed_boost()
                         advantage_items.remove(advantage_item)
                         advantage_items.append(AdvantageItem())
+                        break  # Ensure only the player who collides gets the boost
 
             # Check for collisions between players
             if players[0].check_collision(players[1]):
