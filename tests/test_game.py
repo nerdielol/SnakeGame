@@ -1,109 +1,102 @@
 import pygame
-from snake_game import Game
+from snake_game import Projectile, Player, Item, AdvantageItem, ProjectileItem, Particle
 
 
-def test_initial_window_size():
-    game = Game()
-    window_size = game.screen.get_size()
-
-    assert window_size == (800, 600)
+def test_player_initial_position():
+    player = Player('red_texture.png', (100, 100))
+    assert player.positions == [(100, 100)]
 
 
-def test_initialize_clock():
-    game = Game()
-
-    assert game.clock is not None
-
-
-def test_initial_snake_position():
-    game = Game()
-    snake = game.snake
-
-    assert snake == [(400, 300)]
+def test_player_move():
+    player = Player('red_texture.png', (100, 100))
+    player.direction = (0, -1)  # UP
+    player.move()
+    assert player.positions[0] == (100, 80)
 
 
-def test_snake_move():
-    game = Game()
-    game.snake = [(400, 300)]
-    game.direction = pygame.K_UP
-    game.update()
-
-    assert game.snake[0] == (400, 290)
+def test_player_grow_snake():
+    player = Player('red_texture.png', (100, 100))
+    player.grow_snake()
+    player.move()
+    assert len(player.positions) == 2
 
 
-def test_game_loop_quit():
-    game = Game()
-    game.running = True
-    pygame.event.post(pygame.event.Event(pygame.QUIT))
-    game.run()
-
-    assert not game.running
+def test_player_change_direction():
+    player = Player('red_texture.png', (100, 100))
+    player.change_direction((0, 1))  # DOWN
+    assert player.direction == (0, 1)
 
 
-def test_snake_direction_change():
-    game = Game()
-    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT))
-    game.handle_input()
-    assert game.direction == pygame.K_LEFT
+def test_player_reset():
+    player = Player('red_texture.png', (100, 100))
+    player.positions = [(200, 200), (180, 200)]
+    player.reset()
+    assert player.positions == [(100, 100)]
+    assert player.score == 0
 
 
-def test_food_spawn():
-    game = Game()
-    assert game.food is not None
+def test_player_activate_speed_boost():
+    player = Player('red_texture.png', (100, 100))
+    player.activate_speed_boost()
+    assert player.speed_multiplier == 2
+    assert player.speed_boost_counter == 600
 
 
-def test_snake_eat_food():
-    game = Game()
-    game.snake = [(400, 300)]
-    game.food = (410, 300)
-    game.update()
-    assert len(game.snake) == 2
+def test_player_activate_projectile_ability():
+    player = Player('red_texture.png', (100, 100))
+    player.activate_projectile_ability()
+    assert player.can_fire_projectile is True
 
 
-def test_snake_collision_with_wall():
-    game = Game()
-    game.snake = [(10, 10)]
-    game.direction = pygame.K_LEFT
-    game.update()
-    assert not game.running
+def test_fire_projectile():
+    player = Player('red_texture.png', (100, 100))
+    player.activate_projectile_ability()
+    projectile = player.fire_projectile()
+    assert projectile is not None
+    assert projectile.position == (100, 100)
 
 
-def test_game_score():
-    game = Game()
-    game.snake = [(400, 300)]
-    game.food = (410, 300)
-    game.update()
-    assert game.score == 1
+def test_projectile_move():
+    projectile = Projectile((100, 100), (1, 0))  # Moving RIGHT
+    projectile.move()
+    assert projectile.position == (120, 100)
 
 
-def test_game_over():
-    game = Game()
-    game.snake = [(400, 300)]
-    game.food = (410, 300)
-    game.update()
-    game.snake = [(410, 300)]
-    game.update()
-    assert not game.running
+def test_projectile_check_collision():
+    player = Player('red_texture.png', (100, 100))
+    player.positions = [(200, 200), (180, 200)]
+    projectile = Projectile((200, 200), (1, 0))
+    assert projectile.check_collision(player) is True
+    assert not projectile.active
 
 
-def test_game_over_screen():
-    game = Game()
-    game.snake = [(0, 10)]
-    game.direction = pygame.K_LEFT
-    game.update()  # This should trigger game over
-    assert game.game_over is True
-    game.render()
-    game_over_text = game.font.render('Game Over! Press R to Restart', True, (255, 255, 255))
-    assert game_over_text is not None
+def test_item_spawn_position():
+    item = Item()
+    assert 0 <= item.position[0] < WIDTH
+    assert 0 <= item.position[1] < HEIGHT
 
 
-def test_restart_game():
-    game = Game()
-    game.snake = [(0, 10)]
-    game.direction = pygame.K_LEFT
-    game.update()  # This should trigger game over
-    assert game.game_over is True
-    game.reset_game()
-    assert game.game_over is False
-    assert game.snake == [(400, 300)]
-    assert game.score == 0
+def test_advantage_item_spawn_position():
+    advantage_item = AdvantageItem()
+    assert 0 <= advantage_item.position[0] < WIDTH
+    assert 0 <= advantage_item.position[1] < HEIGHT
+
+
+def test_projectile_item_spawn_position():
+    projectile_item = ProjectileItem()
+    assert 0 <= projectile_item.position[0] < WIDTH
+    assert 0 <= projectile_item.position[1] < HEIGHT
+
+
+def test_particle_lifetime():
+    particle = Particle((100, 100))
+    initial_lifetime = particle.lifetime
+    particle.update()
+    assert particle.lifetime == initial_lifetime - 1
+
+
+def test_particle_velocity():
+    particle = Particle((100, 100))
+    assert len(particle.velocity) == 2
+    assert -1 <= particle.velocity[0] <= 1
+    assert -1 <= particle.velocity[1] <= 1

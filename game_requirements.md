@@ -1,37 +1,75 @@
-# Snake Game Requirements
+# Game Requirements Document
 
-## 1. Game Initialization
+## Overview
 
-- **R1.1**: The game should create a window of size 800x600 pixels.
-- **R1.2**: The game should initialize a clock object to manage the frame rate.
+This document outlines the requirements for the enhanced snake game, which now includes new features such as speed boosts, projectiles, and additional advantage items.
 
-## 2. Snake
+## Functional Requirements
 
-- **R2.1**: The snake's initial position should be at the center of the screen (400, 300).
-- **R2.2**: The snake should start with a length of 1 segment.
-- **R2.3**: The snake should move by 10 pixels per frame in the current direction.
-- **R2.4**: The snake should grow by one segment when it eats food.
-- **R2.5**: The game should end if the snake collides with the screen boundaries or itself.
+### 1. Gameplay Modes
 
-## 3. Food
+- **Single Player Mode**: Player vs. Bot.
+- **Two Player Mode**: Player vs. Player on the same screen.
 
-- **R3.1**: The food should spawn at a random position within the game window.
-- **R3.2**: The food position should be updated when the snake eats it.
-- **R3.3**: The score should increase by 1 point for each piece of food eaten.
+### 2. Players
 
-## 4. Game Loop
+- Players are represented by a textured snake, which grows when collecting items.
+- Players can move in four directions: **UP**, **DOWN**, **LEFT**, and **RIGHT**.
+- Players can collect items, use speed boosts, and fire projectiles.
 
-- **R4.1**: The game loop should run until the player quits the game.
-- **R4.2**: The game should handle input events, update the game state, and render the screen each frame.
-- **R4.3**: The frame rate should be capped at 15 frames per second.
+### 3. Items
 
-## 5. User Input
+- **Regular Items (Green)**: Increase the snake's length by one segment.
+- **Speed Boost Items (Yellow)**: Double the speed of the player for a set duration (10 seconds). Effects are stackable.
+- **Projectile Items (Orange)**: Allow players to fire projectiles from the snake's head.
 
-- **R5.1**: The player should be able to change the snake's direction using the arrow keys.
-- **R5.2**: The game should quit when the player closes the window.
+### 4. Projectiles
 
-## 6. Game Over
+- **Firing Mechanism**: Players with projectile ability can fire using a specific key (**SPACE** for player 1).
+- **Projectile Behavior**: If a projectile hits an opposing player, the opposing player's snake loses one segment.
 
-- **R6.1**: A game over message should be displayed when the snake dies.
-- **R6.2**: The player should be able to restart the game by pressing a key.
-- **R6.3**: The player should be able to quit the game by closing the window.
+### 5. Collisions
+
+- If a player's snake head collides with another player, the colliding player resets.
+- Projectiles fired by players can also reduce the size of the opposing player's snake upon impact.
+
+### 6. Particle Effects
+
+- Particle effects are displayed when a player collects an item, enhancing the visual experience.
+
+## Non-Functional Requirements
+
+### 1. Performance
+
+- The game should run at **60 FPS** for a smooth user experience.
+- The movement and projectile speeds should be consistent across different devices.
+
+### 2. Compatibility
+
+- The game requires **pygame version 2.1.0 or higher** for compatibility with the new features.
+
+### 3. User Interface
+
+- The game should display player scores and speed levels in a verbose manner, indicating if the player has a speed boost and the current multiplier (e.g., "Fast (x2)").
+- The game should provide clear visual cues for the different types of items (e.g., colors for regular, speed, and projectile items).
+
+## Controls
+
+### Player 1
+
+- **W, A, S, D**: Movement.
+- **SPACE**: Fire projectile (if available).
+
+### Player 2
+
+- **Arrow Keys**: Movement.
+
+## Assets
+
+- **Textures**: Textures for the snakes must be provided (`red_texture.png`, `blue_texture.png`).
+- **Background**: A background image (`background.png`) is used to enhance the game's visual appeal.
+
+## Future Enhancements
+
+- **Additional Power-ups**: Introduce more power-ups that could affect the game in various ways, such as invisibility or teleportation.
+- **Multiplayer Over Network**: Enable multiplayer gameplay over a network connection.
